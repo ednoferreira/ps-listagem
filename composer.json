@@ -1,0 +1,12 @@
+{
+    "name": "proseleta/listagem",
+    "description": "Pacote que auxilia na listagem de registros",
+    "authors": [
+        {
+            "name": "Edno Nunes Ferreira",
+            "email": "edno@impactaweb.com.br"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {}
+}
