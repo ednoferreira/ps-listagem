@@ -1,6 +1,7 @@
 <?php
 
 namespace Proseleta\Listagem;
+use Illuminate\Support\Facades\URL;
 
 class Listagem
 {
@@ -41,6 +42,13 @@ class Listagem
                     # considera-se que enviou só o label mesmo:
                     $this->colunas[$campo] = ['label' => $params];
                 }
+                # link para ordenação:
+                # se já existe ordem, verificamos a direção para mudá-la
+                $dir = 'ASC';
+                if (isset($_GET['ord']) && $_GET['ord'] == $campo) {
+                    $dir = $_GET['dir'] == 'ASC' ? 'DESC' : 'ASC';
+                }
+                $this->colunas[$campo]['coluna_link'] = '<a href="'.URL::current().'?ord='.$campo.'&dir='.$dir.'" >'.$this->colunas[$campo]['label'].'</a>';
             }
         }
 
@@ -59,9 +67,9 @@ class Listagem
      * Setamos os dados que serão exibidos:
      * Recebe um array
      */
-    public function setDados($array = [])
+    public function setDados($dados)
     {
-        $this->dados = $array;
+        $this->dados = $dados;
     }
 
     /**
@@ -70,6 +78,7 @@ class Listagem
      */
     public function prepararDados()
     {
+        # prepara os dados com callbacks e etc...
         if (!empty($this->dados)) {
             # passamos por todos os registros:
             foreach ($this->dados as $index => $registro) {
@@ -77,11 +86,8 @@ class Listagem
                 foreach ($this->colunas as $campo => $params) {
                     foreach ($params as $item => $valor) {
                         switch ($item) {
-                            case 'flag':
-                                $this->dados[$index][$campo] = '<'.$params['callback']($registro[$campo]);
-                            break;
                             case 'callback':
-                                $this->dados[$index][$campo] = $params['callback']($registro[$campo]);
+                                $this->dados[$index]->$campo = $params['callback']($registro->$campo);
                             break;
                         }
                     }

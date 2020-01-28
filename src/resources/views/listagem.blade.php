@@ -2,7 +2,7 @@
         {{-- Cabeçalho com as colunas --}}
         <th>
         @foreach($colunas as $coluna => $params)
-            <td>{{ $params['label'] }}</td>
+            <td>{!! $params['coluna_link'] !!}</td>
         @endforeach
         </th>
 
@@ -10,7 +10,7 @@
         @foreach ($dados as $registro)
             <tr>
             @foreach ($colunas as $coluna => $params)
-                <td>{{ $registro[$coluna] }}</td>
+                <td>{{ $registro->$coluna }}</td>
             @endforeach
             </tr>
         @endforeach
