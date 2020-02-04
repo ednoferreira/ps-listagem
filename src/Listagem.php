@@ -1,18 +1,26 @@
 <?php
 
 namespace Proseleta\Listagem;
-use Illuminate\Support\Facades\URL;
 
 class Listagem
 {
     /**
      * Colunas a serem listadas na tabela.
+     * @var Array
      */
-    public $colunas = [];
+    public $colunas;
     /**
      * Dados(registros) que serão listados:
+     * @var Object (collection)
      */
-    public $dados = [];
+    public $dados;
+
+    /**
+     * View que será usada na listagem.
+     * Pode ser alterada sob demanda.
+     * @var String
+     */
+    public $view = 'listagem::listagem';
 
     public function __construct() {
 
@@ -42,21 +50,14 @@ class Listagem
                     # considera-se que enviou só o label mesmo:
                     $this->colunas[$campo] = ['label' => $params];
                 }
-                # link para ordenação:
-                # se já existe ordem, verificamos a direção para mudá-la
-                $dir = 'ASC';
-                if (isset($_GET['ord']) && $_GET['ord'] == $campo) {
-                    $dir = $_GET['dir'] == 'ASC' ? 'DESC' : 'ASC';
-                }
-                $this->colunas[$campo]['coluna_link'] = '<a href="'.URL::current().'?ord='.$campo.'&dir='.$dir.'" >'.$this->colunas[$campo]['label'].'</a>';
+                # link para ordenação:                
+                $this->colunas[$campo]['coluna_link'] = $this->montarLinkOrdenacao($campo);
             }
         }
-
-        //dd($this->colunas);
     }
 
     /**
-     * Dá um reset na variável colunas
+     * 
      */
     public function limparColunas()
     {
@@ -64,8 +65,7 @@ class Listagem
     }
 
     /**
-     * Setamos os dados que serão exibidos:
-     * Recebe um array
+     * Setamos os dados que serão exibidos na listagem:
      */
     public function setDados($dados)
     {
@@ -74,7 +74,8 @@ class Listagem
 
     /**
      * Montagem dos dados antes de serem exibidos.
-     * Percorremos todos os $this->dados e fazemos as ações necessárias:
+     * Percorremos todos os $this->dados e fazemos as ações necessárias, 
+     * como customizar o campo, callbacks...
      */
     public function prepararDados()
     {
@@ -96,14 +97,40 @@ class Listagem
         }
     }
 
-    public function render()
+    /**
+     * Renderiza a view de listagem:
+     * @param $view customizada(opcional)
+     */
+    public function render($view = '')
     {
         $this->prepararDados();
-        # template padrão do pacote, que pode ser customizado: namespace/nome_da_view
-        return view('listagem::listagem', [
+
+        # template padrão do pacote, que pode ser customizado
+        return view((empty($view)? $this->view : $view), [
             'colunas' => $this->colunas,
             'dados'   => $this->dados,
         ]);
+    }
+
+    /**
+     * Montar o link de ordenação de cada coluna:
+     */
+    public function montarLinkOrdenacao($campo)
+    {
+        # se já existe ordem, verificamos a direção para mudá-la
+        $dir = 'ASC';
+        if (isset($_GET['ord']) && $_GET['ord'] == $campo) {
+            $dir = $_GET['dir'] == 'ASC' ? 'DESC' : 'ASC';
+        }
+
+        # removemos da query string a "ord" e "dir" antigas:
+        $array = request()->query();
+        unset($array['ord'], $array['dir']);
+        # remonta a query string:
+        $query_string = http_build_query($array);
+        $separador = (empty($query_string)) ? '' : '&';
+        $url = request()->url().'?'.$query_string.$separador.'ord='.$campo.'&dir='.$dir;
+        return '<a href="'.$url.'" >'.$this->colunas[$campo]['label'].'</a>';
     }
 
 }

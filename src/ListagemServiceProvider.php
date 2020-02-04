@@ -23,7 +23,7 @@ class ListagemServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // aqui declaramos de onde o pacote irá ler as views, prestando atenção no namespace
+        // 
         $this->loadViewsFrom(__DIR__.'/resources/views', 'listagem');
     }
 }
