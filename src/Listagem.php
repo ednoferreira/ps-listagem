@@ -16,14 +16,35 @@ class Listagem
     public $dados;
 
     /**
+     * Campo da tabela que será mostrado na coluna ID
+     */
+    private $indice;
+
+    /**
      * View que será usada na listagem.
      * Pode ser alterada sob demanda.
      * @var String
      */
     public $view = 'listagem::listagem';
 
-    public function __construct() {
+    public function __construct($indice = null) {
+        $this->setIndice($indice);
+    }
 
+    /**
+     * Seta o índice da tabela:
+     */
+    public function setIndice($indice)
+    {
+        $this->indice = $indice;
+    }
+
+    /**
+     * Obter o campo indice
+     */
+    public function getIndice()
+    {
+        return in_array('ID', $this->colunas) ? $this->colunas[0] : null;
     }
 
     /**
@@ -38,9 +59,11 @@ class Listagem
      */
     public function setColunas($colunas = []) 
     {
-        # limpa as colunas atuais se existir:
-        $this->limparColunas();
-
+        # se existe o campo índice, será adicionado em $colunas[]:
+        if (!is_null($this->indice)) {
+            $colunas = [$this->indice => 'ID'] + $colunas;
+        }
+        
         if (!empty($colunas)) {
             foreach ($colunas as $campo => $params) {
                 if (is_array($params)) {
@@ -54,14 +77,6 @@ class Listagem
                 $this->colunas[$campo]['coluna_link'] = $this->montarLinkOrdenacao($campo);
             }
         }
-    }
-
-    /**
-     * 
-     */
-    public function limparColunas()
-    {
-        $this->colunas = [];
     }
 
     /**
@@ -98,13 +113,23 @@ class Listagem
     }
 
     /**
+     * Verifica se o índice realmente existe em $dados:
+     */
+    public function checkIndice()
+    {
+        if (!empty($this->indice) && is_object($this->dados) && !isset($this->dados->first()->{$this->indice})) {
+            throw new \Exception('Listagem: o índice informado ('.$this->indice.') não existe na coleção de dados.');
+        }
+    }
+
+    /**
      * Renderiza a view de listagem:
      * @param $view customizada(opcional)
      */
     public function render($view = '')
     {
+        $this->checkIndice();
         $this->prepararDados();
-
         # template padrão do pacote, que pode ser customizado
         return view((empty($view)? $this->view : $view), [
             'colunas' => $this->colunas,
@@ -113,7 +138,10 @@ class Listagem
     }
 
     /**
-     * Montar o link de ordenação de cada coluna:
+     * Montar o link de ordenação de cada coluna.
+     * O objetivo é inserir os parâmetros ordem(ord) e direção(dir) ao link para que, ao ser clicado, volte
+     * para a mesma página com a nova ordem/direção e mantendo parâmetros que possam existir anteriormente(como busca, etc...)
+     * @param $campo String <nome original do campo da tabela>
      */
     public function montarLinkOrdenacao($campo)
     {
