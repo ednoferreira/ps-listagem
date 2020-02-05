@@ -54,7 +54,7 @@ class Listagem
      * ex: 
      * $colunas => [
      *   'data_nasc' => 'Data de Nascimento',
-     *   'ativo'     => ['label' => 'Ativo', 'flag' => true]
+     *   'ativo'     => ['label' => 'Ativo', 'callback' => (alguma function personalizada))]
      * ]
      */
     public function setColunas($colunas = []) 
@@ -80,7 +80,10 @@ class Listagem
     }
     
     /**
-     * Source: recebe a variável que contém a Model a ser utilizada na busca
+     * Source: recebe a variável que contém a Model a ser utilizada na busca dos registros.
+     * No caso a query deve vir sem o get(), pois ele indica a finalização do processo de 
+     * busca (não pode haver ordenação ou where's após o get(), por exemplo...), 
+     * então o get() é feito neste método ao final de tudo + paginação.
      */
     public function setSource($source)
     {

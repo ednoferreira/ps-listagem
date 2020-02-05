@@ -15,7 +15,7 @@ th, td { border:solid 1px #ccc; padding:5px; }
         @foreach ($dados as $registro)
             <tr>
             @foreach ($colunas as $coluna => $params)
-                <td>{{ $registro->$coluna }}</td>
+                <td>{!! $registro->$coluna !!}</td>
             @endforeach
             </tr>
         @endforeach
