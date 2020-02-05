@@ -78,6 +78,19 @@ class Listagem
             }
         }
     }
+    
+    /**
+     * Source: recebe a variável que contém a Model a ser utilizada na busca
+     */
+    public function setSource($source)
+    {
+        # verificamos se tem ordenação:
+        if (request()->get('ord') !== null) {
+            $source = $source::orderBy(request()->get('ord'), (request()->get('dir') !== null) ? request()->get('dir') : 'ASC');
+        }
+        $source = $source->get();
+        $this->setDados($source);
+    }
 
     /**
      * Setamos os dados que serão exibidos na listagem:
