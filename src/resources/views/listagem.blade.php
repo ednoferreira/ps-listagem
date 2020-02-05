@@ -1,10 +1,15 @@
+<style type="text/css" >
+table { width:800px; }
+th, td { border:solid 1px #ccc; padding:5px; }
+</style>
+
 <table>
         {{-- Cabeçalho com as colunas --}}
-        <th>
+        <tr>
         @foreach($colunas as $coluna => $params)
-            <td>{!! $params['coluna_link'] !!}</td>
+            <th>{!! $params['coluna_link'] !!}</th>
         @endforeach
-        </th>
+        </tr>
 
         {{-- Registros --}}
         @foreach ($dados as $registro)
