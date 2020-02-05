@@ -9,6 +9,13 @@ class Listagem
      * @var Array
      */
     public $colunas;
+
+    /**
+     * Source: seria a fonte de dados(Model, DB::table('tabela')) que será usada nas queries
+     * caso a listagem faça este gerenciamento
+     */
+    private $source;
+
     /**
      * Dados(registros) que serão listados:
      * @var Object (collection)
@@ -70,6 +77,15 @@ class Listagem
                     # preenchemos a variável principal com os parâmetros enviados
                     $this->colunas[$campo] = $params;
                 } else {
+                    /**
+                     * caso não tenha sido enviado nemhum parâmetro(nem label), aqui fazemos a 
+                     * transformação. Basta verificar se está no formato 
+                     * [0 => 'campo_tabela'] ao invés de ['campo_tabela' => 'Campo Tabela']
+                     * */
+                    if (is_int($campo)) {
+                        $campo = $params;
+                        $params = $this->label($params);
+                    }
                     # considera-se que enviou só o label mesmo:
                     $this->colunas[$campo] = ['label' => $params];
                 }
@@ -87,16 +103,35 @@ class Listagem
      */
     public function setSource($source)
     {
+        $this->source = $source;
+    }
+
+    /**
+     * Prepara a query para a listagem dos dados:
+     */
+    public function prepararQuery()
+    {
+        if (is_null($this->source)) {
+            return null;
+        }
         # inicia o builder caso tenha passado a Model pura, para não dar exception ao tentar montar query numa string:
-        $source = (is_string($source)) ? $source::query() : $source;
+        $source = (is_string($this->source)) ? $this->source::query() : $this->source;
 
         # verificamos se tem ordenação:
         if (request()->get('ord') !== null) {
             $source = $source->orderBy(request()->get('ord'), (request()->get('dir') !== null) ? request()->get('dir') : 'ASC');
         }
 
+        # Busca?
+        if (request()->get('busca') !== null) {
+            foreach ($this->colunas as $campo => $params) {
+                $source = $source->orWhere($campo, 'LIKE', '%'.request()->get('busca').'%');
+            }
+        }
         $source = $source->get();
         $this->setDados($source);
+
+        return;
     }
 
     /**
@@ -149,6 +184,7 @@ class Listagem
     public function render($view = '')
     {
         $this->checkIndice();
+        $this->prepararQuery();
         $this->prepararDados();
         # template padrão do pacote, que pode ser customizado
         return view((empty($view)? $this->view : $view), [
@@ -179,6 +215,16 @@ class Listagem
         $separador = (empty($query_string)) ? '' : '&';
         $url = request()->url().'?'.$query_string.$separador.'ord='.$campo.'&dir='.$dir;
         return '<a href="'.$url.'" >'.$this->colunas[$campo]['label'].'</a>';
+    }
+
+    /**
+     * Transformar o nome do campo em um "label" mais amigável
+     * @param String $campo
+     */
+    public function label($campo)
+    {
+        $campo = str_replace('_', ' ', $campo);
+        return ucfirst($campo);
     }
 
 }

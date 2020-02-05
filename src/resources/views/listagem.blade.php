@@ -1,23 +1,31 @@
 <style type="text/css" >
-table { width:800px; }
+.corpo * { float:none; margin-top:15px; }
+table { width:800px; margin:10px auto; }
 th, td { border:solid 1px #ccc; padding:5px; }
+form { text-align:right; background:#dedede; }
 </style>
 
-<table>
-        {{-- Cabeçalho com as colunas --}}
-        <tr>
-        @foreach($colunas as $coluna => $params)
-            <th>{!! $params['coluna_link'] !!}</th>
-        @endforeach
-        </tr>
+<div class="corpo" >
+    <div class="header">
+        @include('listagem::busca')
+    </div>
 
-        {{-- Registros --}}
-        @foreach ($dados as $registro)
+    <table>
+            {{-- Cabeçalho com as colunas --}}
             <tr>
-            @foreach ($colunas as $coluna => $params)
-                <td>{!! $registro->$coluna !!}</td>
+            @foreach($colunas as $coluna => $params)
+                <th>{!! $params['coluna_link'] !!}</th>
             @endforeach
             </tr>
-        @endforeach
-        
-</table>
+
+            {{-- Registros --}}
+            @foreach ($dados as $registro)
+                <tr>
+                @foreach ($colunas as $coluna => $params)
+                    <td>{!! $registro->$coluna !!}</td>
+                @endforeach
+                </tr>
+            @endforeach
+            
+    </table>
+</div>
