@@ -84,10 +84,14 @@ class Listagem
      */
     public function setSource($source)
     {
+        # inicia o builder caso tenha passado a Model pura, para não dar exception ao tentar montar query numa string:
+        $source = (is_string($source)) ? $source::query() : $source;
+
         # verificamos se tem ordenação:
         if (request()->get('ord') !== null) {
-            $source = $source::orderBy(request()->get('ord'), (request()->get('dir') !== null) ? request()->get('dir') : 'ASC');
+            $source = $source->orderBy(request()->get('ord'), (request()->get('dir') !== null) ? request()->get('dir') : 'ASC');
         }
+
         $source = $source->get();
         $this->setDados($source);
     }
