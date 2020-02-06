@@ -186,6 +186,15 @@ class Listagem
         $this->checkIndice();
         $this->prepararQuery();
         $this->prepararDados();
+
+        # é uma requisição ajax? Retornaremos só o json
+        if (request()->ajax()) {
+            return response()->json([
+                'colunas' => $this->colunas,
+                'dados'   => $this->dados,
+            ]);
+        }
+
         # template padrão do pacote, que pode ser customizado
         return view((empty($view)? $this->view : $view), [
             'colunas' => $this->colunas,
