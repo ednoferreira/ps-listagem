@@ -1,8 +1,10 @@
 <style type="text/css" >
-.corpo * { float:none; margin-top:15px; }
+.corpo { margin:15px 0; }
+.corpo * { float:none; }
 table { width:800px; margin:10px auto; }
 th, td { border:solid 1px #ccc; padding:5px; }
 form { text-align:right; background:#dedede; }
+input[type="number"], select { width:60px; }
 </style>
 
 <div class="corpo" >
@@ -28,8 +30,6 @@ form { text-align:right; background:#dedede; }
             @endforeach
     </table>
 
-    @if($paginacao)
-        {{ $dados->appends(request()->input())->links() }}
-        {{-- dica: o método appends informa ao links() que deve manter a query string ao paginar --}}
-    @endif
+    @include('listagem::paginacao')
+
 </div>

@@ -169,8 +169,10 @@ class Listagem
         # Paginação:
         if ($this->paginacao) {
             # verificamos se a paginação foi alterada pelo usuário:
-            $porPagina = (request()->get('pp') !== null && ((int)request()->get('pp') > 0 && (int)request()->get('pp') < $this->porPaginaMax)) ? request()->get('pp') : $this->porPagina;
-            $source = $source->paginate($porPagina);
+            if (request()->get('pp') !== null && ((int)request()->get('pp') > 0 && (int)request()->get('pp') < $this->porPaginaMax)) {
+                $this->porPagina = request()->get('pp');
+            }
+            $source = $source->paginate($this->porPagina);
         } else {
             $source = $source->get();
         }
