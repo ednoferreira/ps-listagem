@@ -28,6 +28,19 @@ class Listagem
     private $indice;
 
     /**
+     * @var $paginacao: ativa/desativa a paginação na query. Default: true
+     */
+    public $paginacao = true;
+    /**
+     * @var $porPagina: quantos itens teremos por página. Default 10
+     */
+    public $porPagina = 10;
+    /**
+     * @var $porPaginaMax: a quantidade máxima permitida de itens por página
+     */
+    private $porPaginaMax = 100;
+
+    /**
      * View que será usada na listagem.
      * Pode ser alterada sob demanda.
      * @var String
@@ -52,6 +65,30 @@ class Listagem
     public function getIndice()
     {
         return in_array('ID', $this->colunas) ? $this->colunas[0] : null;
+    }
+
+    /**
+     * Seta a paginação
+     * @param Boolean
+     */
+    public function setPaginacao($paginacao)
+    {
+        if (is_bool($paginacao)) {
+            return $this->paginacao = $paginacao;
+        }
+        throw new \Exception('O parâmetro para setar a paginação deve ser booleano');
+    }
+
+    /**
+     * Seta a quantidade de registros por página para a paginação
+     * @param Integer
+     */
+    public function setPorPagina($quantidade)
+    {
+        if (is_int($quantidade)) {
+            return $this->porPagina = $quantidade;
+        }
+        throw new \Exception('O parâmetro para setar a quantidade de itens por página deve ser do tipo inteiro.');
     }
 
     /**
@@ -128,7 +165,16 @@ class Listagem
                 $source = $source->orWhere($campo, 'LIKE', '%'.request()->get('busca').'%');
             }
         }
-        $source = $source->get();
+
+        # Paginação:
+        if ($this->paginacao) {
+            # verificamos se a paginação foi alterada pelo usuário:
+            $porPagina = (request()->get('pp') !== null && ((int)request()->get('pp') > 0 && (int)request()->get('pp') < $this->porPaginaMax)) ? request()->get('pp') : $this->porPagina;
+            $source = $source->paginate($porPagina);
+        } else {
+            $source = $source->get();
+        }
+
         $this->setDados($source);
 
         return;
@@ -187,19 +233,19 @@ class Listagem
         $this->prepararQuery();
         $this->prepararDados();
 
+        $resposta = [
+            'colunas'   => $this->colunas,
+            'dados'     => $this->dados,
+            'paginacao' => $this->paginacao,
+        ];
+
         # é uma requisição ajax? Retornaremos só o json
         if (request()->ajax()) {
-            return response()->json([
-                'colunas' => $this->colunas,
-                'dados'   => $this->dados,
-            ]);
+            return response()->json($resposta);
         }
 
         # template padrão do pacote, que pode ser customizado
-        return view((empty($view)? $this->view : $view), [
-            'colunas' => $this->colunas,
-            'dados'   => $this->dados,
-        ]);
+        return view((empty($view)? $this->view : $view), $resposta);
     }
 
     /**

@@ -26,6 +26,10 @@ form { text-align:right; background:#dedede; }
                 @endforeach
                 </tr>
             @endforeach
-            
     </table>
+
+    @if($paginacao)
+        {{ $dados->appends(request()->input())->links() }}
+        {{-- dica: o método appends informa ao links() que deve manter a query string ao paginar --}}
+    @endif
 </div>
