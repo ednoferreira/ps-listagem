@@ -24,31 +24,68 @@ class Listagem
 
     /**
      * Campo da tabela que será mostrado na coluna ID
+     * @var String
      */
     private $indice;
 
     /**
-     * @var $paginacao: ativa/desativa a paginação na query. Default: true
+     * @var Boolean ativa/desativa a paginação na query. Default: true <Boolean>
      */
-    public $paginacao = true;
+    public $paginacao;
+
     /**
-     * @var $porPagina: quantos itens teremos por página. Default 10
+     * @var Integer - quantos itens teremos por página. Default 10 <int>
      */
-    public $porPagina = 10;
+    public $porPagina;
+
     /**
-     * @var $porPaginaMax: a quantidade máxima permitida de itens por página
+     * @var Integer - a quantidade máxima permitida de itens por página
      */
-    private $porPaginaMax = 100;
+    private $porPaginaMax;
+
+    /**
+     * Ações da listagem (editar, excluir, [customizados]...)
+     * @var Array
+     */
+    private $acoes;
 
     /**
      * View que será usada na listagem.
      * Pode ser alterada sob demanda.
      * @var String
      */
-    public $view = 'listagem::listagem';
+    public $view;
+
+    /**
+     * Nome do arquivo de configuracoes
+     */
+    public $arquivoConfig = 'proseleta-listagem';
 
     public function __construct($indice = null) {
+
         $this->setIndice($indice);
+
+        # verifica se há qtd de itens por página alterados pelo usuário da sessão:
+        $this->checkQtdPorPagina();
+
+        # set configs
+        $this->setValoresPadrao();
+
+        if (empty($this->view)) {
+            throw new \Exception('Não foi possível ler o arquivo de configuração');
+        }
+    }
+
+    /**
+     * Setamos os valores padrão de configuração da listagem,
+     * são itens buscados do config que o usuário pode customizar:
+     */
+    public function setValoresPadrao()
+    {
+        $this->view         = config($this->arquivoConfig.'.view');
+        $this->paginacao    = config($this->arquivoConfig.'.paginacao');
+        $this->porPagina    = config($this->arquivoConfig.'.porPagina');
+        $this->porPaginaMax = config($this->arquivoConfig.'.porPaginaMax');
     }
 
     /**
@@ -171,6 +208,8 @@ class Listagem
             # verificamos se a paginação foi alterada pelo usuário:
             if (request()->get('pp') !== null && ((int)request()->get('pp') > 0 && (int)request()->get('pp') < $this->porPaginaMax)) {
                 $this->porPagina = request()->get('pp');
+                # salva na sessão para reaproveitar durante a navegação do usuário:
+                $this->salvarPorPagina($this->porPagina);
             }
             $source = $source->paginate($this->porPagina);
         } else {
@@ -239,6 +278,7 @@ class Listagem
             'colunas'   => $this->colunas,
             'dados'     => $this->dados,
             'paginacao' => $this->paginacao,
+            'porPagina' => $this->porPagina,
         ];
 
         # é uma requisição ajax? Retornaremos só o json
@@ -282,6 +322,36 @@ class Listagem
     {
         $campo = str_replace('_', ' ', $campo);
         return ucfirst($campo);
+    }
+
+    /**
+     * Ações da listagem (editar, excluir, etc...)
+     * @param Array
+     */
+    // public function setAcoes($acoes)
+    // {
+    //     if (is_array($acoes)) {
+    //         return $this->acoes = $acoes;
+    //     }        
+    //     throw new \Exception('Listagem: parâmetro inválido para o setAcoes()');
+    // }
+
+    /**
+     * Manter na sessão a configuração "porPagina" caso seja alterada pelo usuário:
+     */
+    public function salvarPorPagina($qtd)
+    {
+        return request()->session()->put('porPagina', $qtd);
+    }
+
+    /**
+     * Verifica se temos a quantidade porPagina customizada:
+     */
+    public function checkQtdPorPagina()
+    {
+        if (request()->session()->has('porPagina')) {
+            $this->porPagina = request()->session()->get('porPagina');
+        }
     }
 
 }

@@ -13,7 +13,7 @@ class ListagemServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->mergeConfigFrom(__DIR__.'/config/proseleta-listagem.php', 'proseleta-listagem');
     }
 
     /**
@@ -23,7 +23,12 @@ class ListagemServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        // 
+        // view
         $this->loadViewsFrom(__DIR__.'/resources/views', 'listagem');
+
+        // config
+        $this->publishes([
+            __DIR__.'/config/proseleta-listagem.php' => config_path('proseleta-listagem.php'),
+        ], 'proseleta-listagem');
     }
 }

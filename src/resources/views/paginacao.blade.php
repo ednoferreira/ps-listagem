@@ -6,7 +6,7 @@
     <form action="{{ request()->url() }}" method="get" style="text-align:left;" />      
 
         Por página:
-        <input type="number" name="pp" value="{{ request()->query('pp') }}" />
+        <input type="number" name="pp" value="{{ request()->query('pp') ?? $porPagina }}" />
 
         ir para:
         <select name="page" onchange="this.form.submit()" >
