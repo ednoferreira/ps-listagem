@@ -8,6 +8,11 @@
             "email": "edno@impactaweb.com.br"
         }
     ],
+    "autoload": {
+        "psr-4": {
+            "Proseleta\\Listagem\\": "src/"
+        }
+    },
     "minimum-stability": "dev",
     "require": {}
 }
