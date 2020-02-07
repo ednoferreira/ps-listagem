@@ -13,7 +13,7 @@ class ListagemServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->mergeConfigFrom(__DIR__.'/config/proseleta-listagem.php', 'proseleta-listagem');
+        $this->mergeConfigFrom(__DIR__.'/../config/proseleta-listagem.php', 'proseleta-listagem');
     }
 
     /**
