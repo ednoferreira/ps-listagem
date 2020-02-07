@@ -1,5 +1,5 @@
 {
-    "name": "proseleta/listagem",
+    "name": "ednoferreira/ps-listagem",
     "description": "Pacote que auxilia na listagem de registros",
     "type": "library",
     "authors": [
@@ -8,11 +8,6 @@
             "email": "edno@impactaweb.com.br"
         }
     ],
-    "autoload": {
-        "psr-4": {
-            "Proseleta\\Listagem\\": "src/"
-        }
-    },
     "minimum-stability": "dev",
     "require": {}
 }
