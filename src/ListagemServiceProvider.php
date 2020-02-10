@@ -24,11 +24,16 @@ class ListagemServiceProvider extends ServiceProvider
     public function boot()
     {
         // view
-        $this->loadViewsFrom(__DIR__.'/resources/views', 'listagem');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'listagem');
 
         // config
         $this->publishes([
-            __DIR__.'/config/proseleta-listagem.php' => config_path('proseleta-listagem.php'),
-        ], 'proseleta-listagem');
+            __DIR__.'/../config/proseleta-listagem.php' => config_path('proseleta-listagem.php'),
+        ], 'config');
+
+        // views
+        $this->publishes([
+            __DIR__.'/../resources/views' => resource_path('views/vendor/listagem'),
+        ], 'views');
     }
 }
